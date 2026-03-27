@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>从业人员健康合格证明</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: #eef2f7;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px;
+    }
+
+    .header-bar {
+      background: linear-gradient(135deg, #1a5fa8, #0d3f6e);
+      color: #fff;
+      text-align: center;
+      padding: 18px 32px;
+      border-radius: 12px 12px 0 0;
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .header-bar .icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .header-bar h1 {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .header-bar .sub {
+      font-size: 10px;
+      opacity: 0.7;
+      margin-top: 2px;
+    }
+
+    .card {
+      background: #fff;
+      width: 100%;
+      max-width: 520px;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 8px 32px rgba(13, 63, 110, 0.12);
+      padding: 28px 32px;
+      border-top: 3px solid #1a5fa8;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      row-gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .info-grid .label {
+      font-size: 12px;
+      color: #888;
+      line-height: 20px;
+    }
+
+    .info-grid .value {
+      font-size: 13px;
+      color: #222;
+      line-height: 20px;
+      font-weight: 500;
+    }
+
+    .info-grid .value.highlight {
+      color: #1a5fa8;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .divider {
+      height: 1px;
+      background: #eee;
+      margin: 24px 0;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      padding: 14px 18px;
+      border-radius: 8px;
+    }
+
+    .status-row.valid {
+      background: #f0faf0;
+      border: 1px solid #c8e6c9;
+    }
+
+    .status-row.expired {
+      background: #fff3f0;
+      border: 1px solid #ffcdd2;
+    }
+
+    .status-row .status-label {
+      font-size: 13px;
+      color: #555;
+    }
+
+    .status-row .status-badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 20px;
+    }
+
+    .status-row.valid .status-badge {
+      background: #4caf50;
+      color: #fff;
+    }
+
+    .status-row.expired .status-badge {
+      background: #f44336;
+      color: #fff;
+    }
+
+    .days-left {
+      font-size: 11px;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    .days-left.valid { color: #4caf50; }
+    .days-left.expired { color: #f44336; }
+
+    /* 二维码区域 */
+    .qr-section {
+      text-align: center;
+      padding-top: 4px;
+    }
+
+    .qr-label {
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    #qrcode {
+      display: inline-block;
+      padding: 10px;
+      border: 1.5px solid #e0e8f0;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .qr-hint {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 10px;
+    }
+
+    /* 底部署名 */
+    .footer-stamp {
+      margin-top: 28px;
+      text-align: right;
+    }
+
+    .footer-stamp .dept {
+      font-size: 12px;
+      color: #444;
+      font-weight: 600;
+    }
+
+    .footer-stamp .date {
+      font-size: 11px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    /* 打印样式 */
+    @media print {
+      body { background: #fff; padding: 0; }
+      .header-bar { border-radius: 0; box-shadow: none; }
+      .card { box-shadow: none; border-radius: 0; }
+      .print-btn { display: none !important; }
+    }
+
+    .print-btn {
+      margin-top: 20px;
+      background: #1a5fa8;
+      color: #fff;
+      border: none;
+      padding: 10px 32px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background .2s;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .print-btn:hover { background: #0d3f6e; }
+
+    .print-btn-wrap {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* 扫码结果页 */
+    .scan-page {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .scan-page.active { display: block; }
+    .cert-page { display: none; }
+    .cert-page.active { display: block; }
+
+    /* 小红书/微信分享头部 */
+    .share-header {
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 0 16px;
+    }
+
+    .share-header .title {
+      font-size: 15px;
+      color: #555;
+      font-weight: 600;
+    }
+
+    .share-header .sub {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="share-header">
+    <div class="title">📋 从业人员健康合格证明</div>
+    <div class="sub">请保存本页，凭证二维码可扫码核验</div>
+  </div>
+
+  <!-- ===== 健康证卡片 ===== -->
+  <div class="header-bar">
+    <div class="icon">✓</div>
+    <div>
+      <h1>从业人员健康合格证明</h1>
+      <div class="sub">HEALTH CERTIFICATE FOR EMPLOYEES</div>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <div class="info-grid">
+      <div class="label">姓　　名</div>
+      <div class="value highlight" id="v-name">张三</div>
+
+      <div class="label">性　　别</div>
+      <div class="value" id="v-gender">男</div>
+
+      <div class="label">身份证号</div>
+      <div class="value" id="v-idcard">522401199001011234</div>
+
+      <div class="label">发证机构</div>
+      <div class="value" id="v-org">毕节市疾病预防控制中心</div>
+
+      <div class="label">从业类别</div>
+      <div class="value" id="v-type">公共场所从业人员</div>
+
+      <div class="label">健康证号</div>
+      <div class="value" id="v-certno">52240100012345</div>
+
+      <div class="label">发证日期</div>
+      <div class="value" id="v-issue">2025-06-01</div>
+
+      <div class="label">有效期限</div>
+      <div class="value" id="v-expire">2026-06-01</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="status-row valid" id="status-row">
+      <div>
+        <div class="status-label">证件状态</div>
+        <div class="days-left valid" id="days-left"></div>
+      </div>
+      <div class="status-badge" id="status-badge">有效</div>
+    </div>
+
+    <div class="qr-section">
+      <div class="qr-label">📱 扫码核验</div>
+      <div id="qrcode"></div>
+      <div class="qr-hint">长按识别或截图保存</div>
+    </div>
+
+    <div class="footer-stamp">
+      <div class="dept" id="v-stamp">毕节市疾病预防控制中心</div>
+      <div class="date" id="v-printdate"></div>
+    </div>
+  </div>
+
+  <div class="print-btn-wrap">
+    <button class="print-btn" onclick="window.print()">🖨 打印此健康证</button>
+  </div>
+
+  <script>
+    // ==================== 健康证数据配置 ====================
+    const CERT_DATA = {
+      name:     '张三',
+      gender:   '男',
+      idcard:   '522401199001011234',
+      org:      '毕节市疾病预防控制中心',
+      type:     '公共场所从业人员',
+      certNo:   '52240100012345',
+      issueDate: '2025-06-01',    // 发证日期
+      expireDate: '2026-06-01',   // 过期日期
+    };
+
+    // 填充页面数据
+    document.getElementById('v-name').textContent    = CERT_DATA.name;
+    document.getElementById('v-gender').textContent = CERT_DATA.gender;
+    document.getElementById('v-idcard').textContent = CERT_DATA.idcard;
+    document.getElementById('v-org').textContent    = CERT_DATA.org;
+    document.getElementById('v-type').textContent   = CERT_DATA.type;
+    document.getElementById('v-certno').textContent = CERT_DATA.certNo;
+    document.getElementById('v-issue').textContent  = CERT_DATA.issueDate;
+    document.getElementById('v-expire').textContent = CERT_DATA.expireDate;
+    document.getElementById('v-stamp').textContent  = CERT_DATA.org;
+    document.getElementById('v-printdate').textContent =
+      '打印时间：' + new Date().toLocaleString('zh-CN');
+
+    // 自动判断是否过期
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const expireDate = new Date(CERT_DATA.expireDate);
+    const diffMs = expireDate - today;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    const statusRow = document.getElementById('status-row');
+    const statusBadge = document.getElementById('status-badge');
+    const daysLeft = document.getElementById('days-left');
+
+    if (diffDays < 0) {
+      statusRow.className = 'status-row expired';
+      statusBadge.textContent = '已过期';
+      statusBadge.style.background = '#f44336';
+      daysLeft.textContent = '已过期 ' + Math.abs(diffDays) + ' 天，请及时补办';
+      daysLeft.className = 'days-left expired';
+    } else if (diffDays <= 30) {
+      statusRow.className = 'status-row expired';
+      statusBadge.textContent = '即将过期';
+      statusBadge.style.background = '#ff9800';
+      daysLeft.textContent = '仅剩 ' + diffDays + ' 天，请注意及时补办';
+      daysLeft.className = 'days-left expired';
+    } else {
+      daysLeft.textContent = '剩余 ' + diffDays + ' 天';
+      daysLeft.className = 'days-left valid';
+    }
+
+    // 生成二维码：扫码后打开本页面的 URL
+    const pageUrl = window.location.href.split('?')[0];
+    new QRCode(document.getElementById('qrcode'), {
+      text: pageUrl,
+      width: 160,
+      height: 160,
+      colorDark: '#0d3f6e',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  </script>
+
+</body>
+</html>
