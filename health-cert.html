@@ -383,8 +383,8 @@
       daysLeft.className = 'days-left valid';
     }
 
-    // 生成二维码：扫码后打开本页面的 URL
-    const pageUrl = window.location.href.split('?')[0];
+    // 生成二维码：扫码后打开公网地址
+    const pageUrl = 'https://a335351.github.io/health-cert/health-cert.html';
     new QRCode(document.getElementById('qrcode'), {
       text: pageUrl,
       width: 160,
